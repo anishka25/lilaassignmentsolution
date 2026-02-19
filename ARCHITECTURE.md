@@ -31,7 +31,7 @@ Browser load
        Journey view: group events by uid → draw poly-lines + event markers on Canvas
        Heatmap view: project (x,z) → pixel, splat Gaussian kernel into Float32 density
                      buffer, normalise, colour-map, composite onto map
-       Aggregate:    repeat fetch for every match on the same map, union all events
+       Aggregate:    repeat fetch for every match on the same map(batched), union all events
 ```
 
 The app never holds more than one match in memory in single-match mode (plus the aggregate buffer when enabled).
@@ -40,7 +40,7 @@ The app never holds more than one match in memory in single-match mode (plus the
 
 ## Trade-offs Made
 
-**Flat JSON files instead of a server/DB** — simple to deploy anywhere (GitHub Pages, `python -m http.server`), but aggregate mode has to fetch up to ~800 files serially. That's slow (~5 s on a warm cache) and can't be cached as a single pre-computed blob.
+**Flat JSON files instead of a server/DB** — simple to deploy anywhere (GitHub Pages, `python -m http.server`), but aggregate mode has to fetch up to ~800 files batched. That's slow (~5 s on a warm cache) and can't be cached as a single pre-computed blob.
 
 **Canvas 2D instead of Shader** — easier to read and debug, sufficient for fast 60 fps rendering. The heatmap kernel is the bottleneck as it takes around 200 ms for large match sets. A shader can drop that to <10 ms.
 

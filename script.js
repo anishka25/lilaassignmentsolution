@@ -805,26 +805,29 @@ async function onHeatmapScopeChange() {
             progressBar.style.width = '0%';
             progressText.textContent = 'Loading matches…';
 
-            // Load all matches for this map
+            // Load all matches for this map in parallel
             const matchesForMap = allMatches.filter(m => m.map_id === mapId);
-            const allEvents = [];
-            for (let i = 0; i < matchesForMap.length; i++) {
-                // Abort if map changed mid-load
-                if (aggregateLoadingMap !== mapId) break;
+            let completed = 0;
+            const total = matchesForMap.length;
+
+            const results = await Promise.all(matchesForMap.map(async m => {
                 try {
-                    const resp = await fetch(`data/match_${matchesForMap[i].file_id}.json`);
+                    const resp = await fetch(`data/match_${m.file_id}.json`);
                     const data = await resp.json();
-                    allEvents.push(...data);
-                } catch (e) {}
-                const pct = Math.round(((i + 1) / matchesForMap.length) * 100);
-                progressBar.style.width = pct + '%';
-                progressText.textContent = `Loading ${i + 1} / ${matchesForMap.length} matches…`;
-                if (i % 20 === 0) await new Promise(r => setTimeout(r, 0));
-            }
+                    completed++;
+                    const pct = Math.round((completed / total) * 100);
+                    progressBar.style.width = pct + '%';
+                    progressText.textContent = `Loaded ${completed} / ${total} matches…`;
+                    return data;
+                } catch (e) {
+                    completed++;
+                    return [];
+                }
+            }));
 
             // Only commit if we're still loading for the same map
             if (aggregateLoadingMap === mapId) {
-                aggregatedHeatmapData = allEvents;
+                aggregatedHeatmapData = results.flat();
             }
             progressEl.classList.add('hidden');
 
