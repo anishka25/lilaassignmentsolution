@@ -68,31 +68,7 @@ The tool correctly maps 3D world coordinates (x, y, z) to 2D minimap pixels usin
 - **Data Format**: JSON (converted from Parquet)
 - **No dependencies** - runs entirely in the browser
 
-## File Structure
-```
-solution/
-├── index.html          # Main application (self-contained)
-├── data/
-│   ├── matches.json    # Match index (177KB)
-│   └── match_*.json    # Per-match data (797 files, ~13MB total)
-├── minimaps/
-│   ├── AmbroseValley_Minimap.png
-│   ├── GrandRift_Minimap.png
-│   └── Lockdown_Minimap.jpg
-└── README.md           # This file
-```
-
-## Browser Compatibility
-- Modern browsers with ES6+ support
-- Tested on Chrome, Firefox, Edge, Safari
-- Mobile-friendly with touch gestures
-
-## Performance Notes
-- Match data loads on-demand (not all at once)
-- Heatmap rendering uses offscreen canvas for better performance
-- Aggregate mode may take a few seconds to load all matches for a map
-- Timeline playback optimized for smooth 60fps rendering
 
 ---
 
-Built for LILA Games Level Design team
+

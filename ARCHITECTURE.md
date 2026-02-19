@@ -1,4 +1,4 @@
-# Architecture — LILA BLACK Player Journey Visualizer
+# Architecture 
 
 ---
 
@@ -11,7 +11,6 @@
 | **Data format** | JSON (converted from Parquet) | Browsers can't read Parquet natively. `convert_data.py` (pandas + pyarrow) runs once offline and outputs ~800 small per-match files. `fetch()` calls are used to retrieve them in the frontend instead of a dedicated backend. |
 | **Coordinate math** | Inline JS, no library | The mapping is `u = (x - originX) / scale`, one line per axis. Pulling in a geo mapping library would be overkill. |
 
-No build step, no bundler, no framework the entire runtime is a static website and easily deployable.
 
 ---
 
