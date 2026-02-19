@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #12121a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2e2e42;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8b5cf6;
+}
+
+.match-card:hover {
+    background: #1a1a26;
+}
+
+.match-card.active {
+    background: #1a1a26;
+    border-left: 3px solid #8b5cf6;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+input[type="range"]::-webkit-slider-track {
+    height: 6px;
+    background: #242435;
+    border-radius: 3px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #8b5cf6;
+    margin-top: -6px;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #a78bfa;
+    box-shadow: 0 0 8px #8b5cf680;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+#mapCanvas {
+    cursor: grab;
+}
+
+#mapCanvas:active {
+    cursor: grabbing;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.toggle-btn {
+    transition: all 0.2s;
+}
+
+.toggle-btn.active {
+    background: #8b5cf6;
+    color: white;
+}
+
+.toggle-btn:not(.active) {
+    background: #1a1a26;
+    color: #94a3b8;
+}
+
+.heatmap-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.tab-btn {
+    transition: all 0.15s;
+}
+
+.tab-btn.active {
+    color: #8b5cf6;
+    border-bottom: 2px solid #8b5cf6;
+}
+
+.tab-btn:not(.active) {
+    color: #64748b;
+    border-bottom: 2px solid transparent;
+}
+
+.badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 9999px;
+}

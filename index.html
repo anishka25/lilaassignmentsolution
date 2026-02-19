@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LILA BLACK — Player Journey Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a26', 600: '#242435', 500: '#2e2e42' },
+                        accent: '#8b5cf6',
+                        kill: '#ef4444',
+                        death: '#f97316',
+                        loot: '#22c55e',
+                        storm: '#06b6d4',
+                        human: '#8b5cf6',
+                        bot: '#64748b',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+</head>
+<body class="h-full bg-dark-900 text-gray-200 overflow-hidden">
+
+<!-- Main Layout -->
+<div class="flex h-full">
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="w-80 bg-dark-800 border-r border-dark-600 flex flex-col h-full flex-shrink-0">
+        <!-- Header -->
+        <div class="p-4 border-b border-dark-600">
+            <div class="flex items-center gap-2 mb-1">
+                <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                <h1 class="text-lg font-bold text-white">LILA BLACK</h1>
+            </div>
+            <p class="text-xs text-gray-500">Player Journey Visualizer</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="p-4 border-b border-dark-600 space-y-3">
+            <div>
+                <label class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1 block">Map</label>
+                <select id="filterMap" class="w-full bg-dark-700 border border-dark-500 text-sm rounded-lg px-3 py-2 text-gray-200 focus:outline-none focus:border-accent">
+                    <option value="all">All Maps</option>
+                    <option value="AmbroseValley">Ambrose Valley</option>
+                    <option value="GrandRift">Grand Rift</option>
+                    <option value="Lockdown">Lockdown</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1 block">Date</label>
+                <select id="filterDay" class="w-full bg-dark-700 border border-dark-500 text-sm rounded-lg px-3 py-2 text-gray-200 focus:outline-none focus:border-accent">
+                    <option value="all">All Days</option>
+                    <option value="February_10">Feb 10</option>
+                    <option value="February_11">Feb 11</option>
+                    <option value="February_12">Feb 12</option>
+                    <option value="February_13">Feb 13</option>
+                    <option value="February_14">Feb 14</option>
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button id="sortRecent" class="toggle-btn active text-xs px-3 py-1.5 rounded-lg flex-1" onclick="setSortMode('events')">Most Action</button>
+                <button id="sortPlayers" class="toggle-btn text-xs px-3 py-1.5 rounded-lg flex-1" onclick="setSortMode('players')">Most Players</button>
+            </div>
+
+        </div>
+
+        <!-- Match List -->
+        <div class="flex-1 overflow-y-auto" id="matchList">
+            <div class="p-4 text-center text-gray-500 text-sm">Loading matches...</div>
+        </div>
+
+        <!-- Stats Footer -->
+        <div id="sidebarFooter" class="p-3 border-t border-dark-600 text-xs text-gray-500">
+            <span id="matchCount">0</span> matches loaded
+        </div>
+    </div>
+
+    <!-- Main Area -->
+    <div class="flex-1 flex flex-col h-full min-w-0">
+
+        <!-- Top Bar -->
+        <div class="h-12 bg-dark-800 border-b border-dark-600 flex items-center px-4 justify-between flex-shrink-0">
+            <div id="topBarInfo" class="text-sm text-gray-400">Select a match from the sidebar to begin</div>
+            <div class="flex items-center gap-3">
+                <!-- View Mode Tabs -->
+                <div class="flex gap-1" id="viewTabs">
+                    <button class="tab-btn active text-xs px-3 py-1 font-medium" data-view="journey" onclick="setView('journey')">Journeys</button>
+                    <button class="tab-btn text-xs px-3 py-1 font-medium" data-view="heatmap" onclick="setView('heatmap')">Heatmap</button>
+                </div>
+                <!-- Legend -->
+                <div id="mapLegend" class="flex items-center gap-3 text-xs text-gray-400 ml-4">
+                    <span class="flex items-center gap-1.5">
+                        <svg width="20" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="#8b5cf6" stroke-width="2"/></svg>Human
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <svg width="20" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3"/></svg>Bot
+                    </span>
+                    <span class="flex items-center gap-1"><span class="legend-dot bg-kill"></span>Kill</span>
+                    <span class="flex items-center gap-1"><span class="legend-dot" style="background:#f97316"></span>Death</span>
+                    <span class="flex items-center gap-1"><span class="legend-dot bg-loot"></span>Loot</span>
+                    <span class="flex items-center gap-1"><span class="legend-dot bg-storm"></span>Storm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Canvas Area -->
+        <div class="flex-1 relative overflow-hidden bg-dark-900" id="canvasContainer">
+            <canvas id="mapCanvas"></canvas>
+            <!-- Tooltip -->
+            <div id="tooltip" class="absolute z-20 bg-dark-800/95 backdrop-blur-sm border border-dark-500 rounded-lg px-3 py-2 text-xs pointer-events-none hidden shadow-xl" style="max-width: 220px;"></div>
+            <!-- Empty state -->
+            <div id="emptyState" class="absolute inset-0 flex items-center justify-center">
+                <div class="text-center">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-dark-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    <p class="text-gray-500 text-lg mb-1">No match selected</p>
+                    <p class="text-gray-600 text-sm">Pick a match from the sidebar to visualize player journeys</p>
+                </div>
+            </div>
+
+            <!-- Controls overlay (bottom-right) -->
+            <div class="absolute bottom-20 right-4 flex flex-col gap-2 z-10">
+                <button onclick="zoomIn()" class="w-9 h-9 bg-dark-700/90 hover:bg-dark-600 border border-dark-500 rounded-lg flex items-center justify-center text-gray-300 text-lg font-bold backdrop-blur-sm">+</button>
+                <button onclick="zoomOut()" class="w-9 h-9 bg-dark-700/90 hover:bg-dark-600 border border-dark-500 rounded-lg flex items-center justify-center text-gray-300 text-lg font-bold backdrop-blur-sm">−</button>
+                <button onclick="resetView()" class="w-9 h-9 bg-dark-700/90 hover:bg-dark-600 border border-dark-500 rounded-lg flex items-center justify-center text-gray-300 backdrop-blur-sm" title="Reset view">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                </button>
+            </div>
+
+            <!-- Event filters overlay (top-right) -->
+            <div id="eventFilters" class="absolute top-4 right-4 bg-dark-800/90 backdrop-blur-sm rounded-xl border border-dark-600 p-3 z-10 hidden">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-medium">Show Events</p>
+                <div class="space-y-1.5">
+                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-white">
+                        <input type="checkbox" checked class="accent-human" data-event-filter="paths">
+                        <span class="w-2.5 h-2.5 rounded-full bg-human/60 inline-block"></span> Movement Paths
+                    </label>
+                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-white">
+                        <input type="checkbox" checked class="accent-kill" data-event-filter="Kill">
+                        <span class="w-2.5 h-2.5 rounded-full bg-kill inline-block"></span> Kills
+                    </label>
+                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-white">
+                        <input type="checkbox" checked class="accent-death" data-event-filter="Killed">
+                        <span class="w-2.5 h-2.5 rounded-full bg-death inline-block"></span> Deaths by Bot
+                    </label>
+                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-white">
+                        <input type="checkbox" checked class="accent-loot" data-event-filter="Loot">
+                        <span class="w-2.5 h-2.5 rounded-full bg-loot inline-block"></span> Loot
+                    </label>
+                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-white">
+                        <input type="checkbox" checked class="accent-storm" data-event-filter="KilledByStorm">
+                        <span class="w-2.5 h-2.5 rounded-full bg-storm inline-block"></span> Storm Deaths
+                    </label>
+                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-white">
+                        <input type="checkbox" checked data-event-filter="bots">
+                        <span class="w-2.5 h-2.5 rounded-full bg-bot inline-block"></span> Show Bots
+                    </label>
+                </div>
+                <div class="mt-3 pt-2 border-t border-dark-600">
+                    <button id="overlayAllBtn" onclick="loadOverlayAll()"
+                        class="heatmap-mode-btn w-full text-left text-xs px-2 py-1.5 rounded-lg flex items-center gap-2">
+                        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        Overlay All Matches
+                    </button>
+                    <div id="overlayProgress" class="hidden mt-2">
+                        <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
+                            <span id="overlayProgressText">Loading...</span>
+                            <button onclick="cancelOverlay()" class="text-gray-600 hover:text-red-400 text-xs">✕ Cancel</button>
+                        </div>
+                        <div class="w-full bg-dark-600 rounded-full h-1.5">
+                            <div id="overlayProgressBar" class="bg-accent h-1.5 rounded-full transition-all" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heatmap type selector (top-left, only in heatmap mode) -->
+            <div id="heatmapControls" class="absolute top-4 left-4 bg-dark-800/90 backdrop-blur-sm rounded-xl border border-dark-600 p-3 z-10 hidden">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-medium">Heatmap Mode</p>
+                <div class="space-y-1">
+                    <button class="heatmap-mode-btn active w-full text-left text-xs px-2 py-1.5 rounded-lg" data-mode="traffic" onclick="setHeatmapMode('traffic')">
+                        <span class="inline-block w-2 h-2 rounded-full bg-purple-400 mr-1.5"></span>High-Traffic Areas
+                    </button>
+                    <button class="heatmap-mode-btn w-full text-left text-xs px-2 py-1.5 rounded-lg" data-mode="kills" onclick="setHeatmapMode('kills')">
+                        <span class="inline-block w-2 h-2 rounded-full bg-kill mr-1.5"></span>Kill Zones
+                    </button>
+                    <button class="heatmap-mode-btn w-full text-left text-xs px-2 py-1.5 rounded-lg" data-mode="deaths" onclick="setHeatmapMode('deaths')">
+                        <span class="inline-block w-2 h-2 rounded-full bg-death mr-1.5"></span>Death Zones
+                    </button>
+                    <button class="heatmap-mode-btn w-full text-left text-xs px-2 py-1.5 rounded-lg" data-mode="loot" onclick="setHeatmapMode('loot')">
+                        <span class="inline-block w-2 h-2 rounded-full bg-loot mr-1.5"></span>Loot Hotspots
+                    </button>
+                </div>
+                <div class="mt-3 pt-2 border-t border-dark-600">
+                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-white mb-2">
+                        <input type="checkbox" id="heatmapAllMatches" class="accent-accent" onchange="onHeatmapScopeChange()">
+                        Aggregate all matches on this map
+                    </label>
+                    <div id="heatmapProgress" class="hidden mb-2">
+                        <div class="text-xs text-gray-400 mb-1" id="heatmapProgressText">Loading…</div>
+                        <div class="h-1.5 bg-dark-600 rounded-full overflow-hidden">
+                            <div id="heatmapProgressBar" class="bg-accent h-1.5 rounded-full transition-all duration-100" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <label class="text-xs text-gray-400 block mb-1">Radius: <span id="heatRadiusVal">20</span>px</label>
+                    <input type="range" id="heatRadius" min="5" max="60" value="20" class="w-full" oninput="document.getElementById('heatRadiusVal').textContent=this.value; renderMap()">
+                    <label class="text-xs text-gray-400 block mb-1 mt-2">Intensity: <span id="heatIntensityVal">0.6</span></label>
+                    <input type="range" id="heatIntensity" min="1" max="10" value="6" step="1" class="w-full" oninput="document.getElementById('heatIntensityVal').textContent=(this.value/10).toFixed(1); renderMap()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Slider Bar -->
+        <div id="timelineBar" class="h-16 bg-dark-800 border-t border-dark-600 px-4 flex items-center gap-4 flex-shrink-0 hidden">
+            <!-- Play/Pause button -->
+            <button id="playBtn" onclick="togglePlayback()" class="w-9 h-9 rounded-full bg-accent hover:bg-accent/80 flex items-center justify-center flex-shrink-0 transition-colors">
+                <svg id="playIcon" class="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="pauseIcon" class="w-4 h-4 text-white hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+
+            <!-- Time display -->
+            <div class="text-xs text-gray-400 w-32 flex-shrink-0">
+                <span id="timeDisplay" class="font-mono text-gray-200">0%</span>
+                <span class="mx-1">·</span>
+                <span id="timeDuration" class="font-mono">0 events</span>
+            </div>
+
+            <!-- Slider -->
+            <div class="flex-1 relative">
+                <input type="range" id="timeSlider" min="0" max="1000" value="0" step="1" class="w-full" oninput="onTimeSliderInput()">
+                <!-- Event markers on the timeline -->
+                <div id="timelineMarkers" class="absolute top-0 left-0 right-0 h-1 pointer-events-none" style="margin-top: -3px;"></div>
+            </div>
+
+            <!-- Speed control -->
+            <div class="flex items-center gap-1 flex-shrink-0">
+                <span class="text-xs text-gray-500">Speed:</span>
+                <select id="playbackSpeed" class="bg-dark-700 border border-dark-500 text-xs rounded px-2 py-1 text-gray-200 focus:outline-none" onchange="updatePlaybackSpeed()">
+                    <option value="0.5">0.5x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="2">2x</option>
+                    <option value="5">5x</option>
+                    <option value="10">10x</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
